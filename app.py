@@ -59,33 +59,40 @@ create_table()
 # DX事例を検索するAPI
 @app.route("/search", methods=["GET"])
 def search_dx_cases():
-    industry = request.args.get("industry", "")
-    technology = request.args.get("technology", "")
+    try:
+        industry = request.args.get("industry", "")
+        technology = request.args.get("technology", "")
 
-    conn = connect_db()
-    if conn is None:
-        return jsonify({"error": "データベース接続エラー"}), 500
+        conn = connect_db()
+        if conn is None:
+            return jsonify({"error": "データベース接続エラー"}), 500
 
-    cur = conn.cursor()
-    query = "SELECT title, industry, technology, company_name, url FROM dx_cases WHERE 1=1"
-    params = []
+        cur = conn.cursor()
+        query = "SELECT title, industry, technology, company_name, url FROM dx_cases WHERE 1=1"
+        params = []
 
-    if industry:
-        query += " AND industry = %s"
-        params.append(industry)
-    if technology:
-        query += " AND technology LIKE %s"
-        params.append(f"%{technology}%")
+        if industry:
+            query += " AND industry = %s"
+            params.append(industry)
+        if technology:
+            query += " AND technology LIKE %s"
+            params.append(f"%{technology}%")
 
-    cur.execute(query, tuple(params))
-    cases = cur.fetchall()
+        cur.execute(query, tuple(params))
+        cases = cur.fetchall()
+        cur.close()
+        conn.close()
 
-    results = [{"title": c[0], "industry": c[1], "technology": c[2], "company": c[3], "url": c[4]} for c in cases]
+        if not cases:
+            return jsonify({"message": "データがありません"}), 200  # ✅ データがない場合の処理
 
-    cur.close()
-    conn.close()
+        results = [{"title": c[0], "industry": c[1], "technology": c[2], "company": c[3], "url": c[4]} for c in cases]
+        return jsonify(results)
 
-    return jsonify(results)
+    except Exception as e:
+        print(f"❌ APIエラー: {e}")
+        return jsonify({"error": "内部エラー", "details": str(e)}), 500  # ✅ エラーを JSON で返す
+
 
 
 @app.route("/update", methods=["POST"])

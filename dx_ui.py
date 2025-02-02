@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-API_URL = "https://dx-compass.onrender.com"
+API_URL = "https://dx-compass.onrender.com/search"
 
 st.title("🔍 DX事例検索")
 
@@ -15,17 +15,26 @@ if st.button("検索"):
     if technology:
         params["technology"] = technology
 
-    response = requests.get(API_URL, params=params)
-    
-    if response.status_code == 200:
-        results = response.json()
-        if results:
-            for case in results:
-                st.markdown(f"### [{case['title']}]({case['url']})")
-                st.write(f"📌 **業界:** {case['industry']} | **技術:** {case['technology']} | **企業:** {case['company']}")
-                st.write("---")
-        else:
-            st.warning("🔍 事例が見つかりませんでした。")
-    else:
-        st.error("❌ 検索エラーが発生しました。")
+    try:
+        response = requests.get(API_URL, params=params)
+        response.raise_for_status()  # ✅ HTTPエラーをキャッチ
 
+        if response.status_code == 200:
+            try:
+                results = response.json()
+                if "error" in results:
+                    st.error(f"❌ APIエラー: {results['error']}")
+                elif "message" in results:
+                    st.warning("⚠️ データがありません")
+                else:
+                    for case in results:
+                        st.markdown(f"### [{case['title']}]({case['url']})")
+                        st.write(f"📌 **業界:** {case['industry']} | **技術:** {case['technology']} | **企業:** {case['company']}")
+                        st.write("---")
+            except requests.exceptions.JSONDecodeError:
+                st.error("❌ APIのレスポンスが不正です")
+        else:
+            st.error(f"❌ APIエラー: {response.status_code}")
+
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ ネットワークエラー: {e}")
