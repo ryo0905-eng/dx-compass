@@ -1,23 +1,17 @@
+import os
 import psycopg2
 
-# PostgreSQLの接続情報
-DB_NAME = "dx_data"
-DB_USER = "matsuokaryo"  # Macのログインユーザーと同じ
-DB_PASSWORD = ""  # 通常、ローカル環境なら空でOK
-DB_HOST = "localhost"
-DB_PORT = "5432"
+# Render の環境変数 `DATABASE_URL` を取得
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # データベース接続
 def connect_db():
+    if not DATABASE_URL:
+        raise ValueError("❌ 環境変数 `DATABASE_URL` が設定されていません！")
+
     try:
-        conn = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            host=DB_HOST,
-            port=DB_PORT
-        )
-        print("✅ PostgreSQLに接続成功！")
+        conn = psycopg2.connect(DATABASE_URL, sslmode="require")  # ✅ SSLモードを有効化
+        print("✅ PostgreSQL に接続成功！")
         return conn
     except Exception as e:
         print("❌ データベース接続エラー:", e)
