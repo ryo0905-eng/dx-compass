@@ -15,7 +15,16 @@ CORS(app)  # すべてのリクエストを許可
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def connect_db():
-    return psycopg2.connect(DATABASE_URL)
+    if not DATABASE_URL:
+        raise ValueError("❌ DATABASE_URL が設定されていません！")
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        print("✅ PostgreSQL に接続成功")
+        return conn
+    except Exception as e:
+        print(f"❌ データベース接続エラー: {e}")
+        return None
 
 
 # DX事例を検索するAPI
