@@ -2,12 +2,16 @@ from flask import Flask, request, jsonify
 import psycopg2
 from db import connect_db
 import threading
+from flask_cors import CORS
+
 from update_data import update_data
 
 import os
 
+
 app = Flask(__name__)
 
+CORS(app)  # すべてのリクエストを許可
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def connect_db():
