@@ -27,6 +27,35 @@ def connect_db():
         return None
 
 
+def create_table():
+    """テーブルがない場合に `dx_cases` を作成する"""
+    conn = connect_db()
+    if conn is None:
+        return
+
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS dx_cases (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            url TEXT UNIQUE NOT NULL,
+            summary TEXT,
+            industry TEXT,
+            technology TEXT,
+            company_name TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    print("✅ `dx_cases` テーブルを作成または確認しました")
+
+# アプリ起動時に `dx_cases` を作成
+create_table()
+
+
 # DX事例を検索するAPI
 @app.route("/search", methods=["GET"])
 def search_dx_cases():
