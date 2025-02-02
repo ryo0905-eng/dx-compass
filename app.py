@@ -8,6 +8,12 @@ import os
 
 app = Flask(__name__)
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+def connect_db():
+    return psycopg2.connect(DATABASE_URL)
+
+
 # DX事例を検索するAPI
 @app.route("/search", methods=["GET"])
 def search_dx_cases():
