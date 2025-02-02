@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-API_URL = "http://127.0.0.1:5000/search"
+API_URL = "https://dx-compass.onrender.com"
 
 st.title("🔍 DX事例検索")
 
