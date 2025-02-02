@@ -4,6 +4,7 @@ from db import connect_db
 import threading
 from update_data import update_data
 
+import os
 
 app = Flask(__name__)
 
@@ -45,5 +46,12 @@ def trigger_update():
     thread.start()
     return jsonify({"message": "データ更新が開始されました。"}), 202
 
+
+@app.route("/")
+def home():
+    return "DX事例検索API is running!"
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Renderのポートを取得
+    app.run(host="0.0.0.0", port=port, debug=False)  # 0.0.0.0 にバインド
+
